@@ -7,19 +7,34 @@ felix_ascii="""    |\\__/,|   (`\\
 felix_path = os.path.join(os.getenv('HOME'), '.local', 'share', 'felix')
 if not os.path.isdir(felix_path):
 	os.makedirs(felix_path)
+
+def felix(message):
+	print(felix_ascii + message)
+
 if len(sys.argv) == 1:
-	print(felix_ascii + """Hi! It's Felix, he can:
+	felix("""Hi! It's Felix, he can:
  - Take notes (take)
+ - Show your notes (show)
  - Show you the save directory (where)""")
 elif sys.argv[1] == "take":
 	if len(sys.argv) > 2:
 		note_path = os.path.join(felix_path, 'note')
 		note_file = open(note_path, "a")
 		note_file.write("".join(i + '\n' for i in sys.argv[2:]))
+		note_file.close()
 		print("Note took !")
 	else:
-		print(felix_ascii + "No notes, so Felix is playing with a ball of yarn.")
+		felix("No notes, so Felix is playing with a ball of yarn.")
+elif sys.argv[1] == "show":
+	note_path = os.path.join(felix_path, 'note')
+	if os.path.isfile(note_path):
+		note_file = open(note_path, "r")
+		notes = note_file.read()
+		note_file.close()
+		print(notes)
+	else:
+		felix("Felix can't find your notes, so he's sleeping.")
 elif sys.argv[1] == "where":
-	print(felix_ascii + felix_path)
+	print(felix_path)
 else:
-	print(felix_ascii + "Felix didn't understand what are you asking for.")
+	felix("Felix didn't understand what are you asking for.")
