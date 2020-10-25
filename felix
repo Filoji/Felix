@@ -1,40 +1,78 @@
 #!/usr/bin/python3
-import sys, os, pathlib
-felix_ascii="""    |\\__/,|   (`\\
-  _.|o o  |_   ) )
--(((---(((--------
-"""
-felix_path = os.path.join(os.getenv('HOME'), '.local', 'share', 'felix')
-if not os.path.isdir(felix_path):
-	os.makedirs(felix_path)
+import sys, os
+
+# ===============================
+# Usefull variables and functions
+# ===============================
+
+def debug(message):
+	print('DEBUG: ' + message)
+
+paths = {
+	'saves' : os.path.join(os.getenv('HOME'), '.local', 'share', 'felix'),
+	'notes' : os.path.join(os.getenv('HOME'), '.local', 'share', 'felix', 'note')
+}
+
+if not os.path.isdir(paths['saves']):
+	os.makedirs(paths['saves'])
 
 def felix(message):
-	print(felix_ascii + message)
+	print("    |\\__/,|   (`\\\n  _.|o o  |_   ) )\n-(((---(((--------\n" + message)
 
-if len(sys.argv) == 1:
+# =================
+# Skills' functions
+# =================
+
+def cat_help():
 	felix("""Hi! It's Felix, he can:
  - Take notes (take)
  - Show your notes (show)
+ - Delete all your notes (clean)
  - Show you the save directory (where)""")
-elif sys.argv[1] == "take":
+
+def cat_take():
 	if len(sys.argv) > 2:
-		note_path = os.path.join(felix_path, 'note')
-		note_file = open(note_path, "a")
+		note_file = open(paths['notes'], "a")
 		note_file.write("".join(i + '\n' for i in sys.argv[2:]))
 		note_file.close()
 		print("Note took !")
 	else:
 		felix("No notes, so Felix is playing with a ball of yarn.")
-elif sys.argv[1] == "show":
-	note_path = os.path.join(felix_path, 'note')
-	if os.path.isfile(note_path):
-		note_file = open(note_path, "r")
+
+def cat_show():
+	if os.path.isfile(paths['notes']):
+		note_file = open(paths['notes'], "r")
 		notes = note_file.read()
 		note_file.close()
-		print(notes)
+		print(notes[:-1 if notes[-1:]=='\n' else len(notes)])
 	else:
 		felix("Felix can't find your notes, so he's sleeping.")
-elif sys.argv[1] == "where":
-	print(felix_path)
+
+def cat_clean():
+	if os.path.isfile(paths['notes']):
+		os.remove(paths['notes'])
+		print('Notes cleaned.')
+	else:
+		felix("No notes to remove, don't ask Felix for nothing while he's sleeping.")
+
+def cat_where():
+	felix(paths['saves'])
+
+# ===========
+# Skills dict
+# ===========
+
+skills = {
+	'help' : cat_help,
+	'take' : cat_take,
+	'show' : cat_show,
+	'clean' : cat_clean,
+	'where' : cat_where
+}
+
+if len(sys.argv) == 1:
+	skills['help']()
+elif sys.argv[1] in skills:
+	skills[sys.argv[1]]()
 else:
 	felix("Felix didn't understand what are you asking for.")
